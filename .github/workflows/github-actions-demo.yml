@@ -1,8 +1,5 @@
 name: Build and Test Next.js App
-on:
-  push:
-    branches: [main]
-  pull_request:
+on: [push]
 
 jobs:
   build:
