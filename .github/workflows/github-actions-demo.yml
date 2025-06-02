@@ -34,8 +34,8 @@ jobs:
       #      par exemple "./tests/videos"
       - name: Run tests (génération de la vidéo)
         run: npm run e2e headless
-        # ↳ Votre npm test doit être configuré pour enregistrer la vidéo de la session de test, 
-        #   par exemple dans tests/videos/*.mp4
+      - run: |
+          ls ${{ github.workspace }}
 
 
 
