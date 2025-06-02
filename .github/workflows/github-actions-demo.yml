@@ -33,7 +33,7 @@ jobs:
       #    → On suppose que votre script de tests (ex. Playwright/Cypress) génère une vidéo dans un dossier connu, 
       #      par exemple "./tests/videos"
       - name: Run tests (génération de la vidéo)
-        run: npm run e2e headless
+        run: npm run e2e:headless
       - run: |
           ls ${{ github.workspace }}
 
