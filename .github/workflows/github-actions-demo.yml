@@ -27,6 +27,18 @@ jobs:
       - name: Build Next.js app
         run: npm run build
 
+
+
+      # 5. Lancement des tests (avec enregistrement vidéo)
+      #    → On suppose que votre script de tests (ex. Playwright/Cypress) génère une vidéo dans un dossier connu, 
+      #      par exemple "./tests/videos"
+      - name: Run tests (génération de la vidéo)
+        run: npm run e2e headless
+        # ↳ Votre npm test doit être configuré pour enregistrer la vidéo de la session de test, 
+        #   par exemple dans tests/videos/*.mp4
+
+
+
       # 6. Upload de la ou des vidéo(s) de test en tant qu’artifact
       - name: Upload test video(s) as artifact
         if: always()   # même si certains tests échouent, on souhaite récupérer la vidéo
