@@ -1,10 +1,6 @@
 name: CI (build + test)
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
+on: [push]
 
 jobs:
   build-and-test:
