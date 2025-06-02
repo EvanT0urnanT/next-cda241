@@ -1,48 +1,78 @@
-name: CI (build + test)
-
-on: [push]
+name: Build and Test Next.js App
+on:
+  push:
+    branches: [main]
+  pull_request:
 
 jobs:
-  build-and-test:
-    name: Build & Test
+  build:
     runs-on: ubuntu-latest
-
+    outputs:
+      cache-key: ${{ steps.cache.outputs.cache-hit }}
     steps:
-      # 1. Checkout du code
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          cache: 'npm'
+          node-version: 24
 
-      # 3. Installation des dépendances
+      - name: Cache node_modules
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
       - name: Install dependencies
         run: npm ci
 
-      # 4. Build de l’application Next.js
       - name: Build Next.js app
         run: npm run build
 
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      matrix:
+        browser: [chrome]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
 
-      # 5. Lancement des tests (avec enregistrement vidéo)
-      #    → On suppose que votre script de tests (ex. Playwright/Cypress) génère une vidéo dans un dossier connu, 
-      #      par exemple "./tests/videos"
-      - name: Run tests (génération de la vidéo)
-        run: npm run e2e:headless
-      - run: |
-          ls ${{ github.workspace }}
+      - name: Restore node_modules cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
+      - name: Install dependencies
+        run: npm ci
 
+      - name: Install browsers
+        run: |
+          npx playwright install ${{ matrix.browser }}
 
-      # 6. Upload de la ou des vidéo(s) de test en tant qu’artifact
-      - name: Upload test video(s) as artifact
-        if: always()   # même si certains tests échouent, on souhaite récupérer la vidéo
+      - name: Run tests on ${{ matrix.browser }}
+        run: npm run e2e:headless -- --browser ${{ matrix.browser }}
+
+      - name: Upload test videos as artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-videos
-          path: cypress/videos/*.mp4
+          name: test-videos-${{ matrix.browser }}
+          path: cypress/videos
+          retention-days: 5
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-failure-screenshots-${{ matrix.browser }}
+          path: cypress/screenshots
+          retention-days: 5
