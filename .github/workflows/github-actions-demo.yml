@@ -1,18 +1,48 @@
-name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push]
+name: CI (build + test)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
 jobs:
-  Explore-GitHub-Actions:
+  build-and-test:
+    name: Build & Test
     runs-on: ubuntu-latest
+
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
-        uses: actions/checkout@v4
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+      # 1. Checkout du code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      # 3. Installation des dépendances
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Build de l’application Next.js
+      - name: Build Next.js app
+        run: npm run build
+
+      # 5. Lancement des tests (avec enregistrement vidéo)
+      #    → On suppose que votre script de tests (ex. Playwright/Cypress) génère une vidéo dans un dossier connu, 
+      #      par exemple "./tests/videos"
+      - name: Run tests (génération de la vidéo)
+        run: npm test
+        # ↳ Votre npm test doit être configuré pour enregistrer la vidéo de la session de test, 
+        #   par exemple dans tests/videos/*.mp4
+
+      # 6. Upload de la ou des vidéo(s) de test en tant qu’artifact
+      - name: Upload test video(s) as artifact
+        if: always()   # même si certains tests échouent, on souhaite récupérer la vidéo
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-videos
+          path: tests/videos/*.mp4
