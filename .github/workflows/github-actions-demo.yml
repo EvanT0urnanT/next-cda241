@@ -10,11 +10,11 @@ jobs:
     steps:
       # 1. Checkout du code
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 2. Setup Node.js
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18.x'
           cache: 'npm'
@@ -38,7 +38,7 @@ jobs:
       # 6. Upload de la ou des vidéo(s) de test en tant qu’artifact
       - name: Upload test video(s) as artifact
         if: always()   # même si certains tests échouent, on souhaite récupérer la vidéo
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-videos
           path: tests/videos/*.mp4
