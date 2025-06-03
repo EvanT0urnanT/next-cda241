@@ -65,7 +65,6 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          strict: true
           script: |
             cd /next-cda241
             git pull origin master        # si besoin de récupérer le dernier code
