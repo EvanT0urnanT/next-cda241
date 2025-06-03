@@ -69,5 +69,7 @@ jobs:
           port: 22 
           script: |
             cd /next-cda241
-            git pull origin master        # si besoin de récupérer le dernier code
-            pm2 restart all             # relancer toutes les apps PM2
+            git pull origin master
+            npm install
+            npm run build
+            pm2 restart all         
