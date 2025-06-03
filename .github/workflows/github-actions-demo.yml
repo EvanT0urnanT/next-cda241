@@ -5,13 +5,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Cache node_modules
         uses: actions/cache@v4
         with:
           path: |
             node_modules
-             /home/runner/.cache/Cypress
+            /home/runner/.cache/Cypress
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
       - run: npm install
       - run: npm run build
 
@@ -23,27 +25,46 @@ jobs:
         browser: ['chrome', 'edge']
     steps:
       - uses: actions/checkout@v4
+
       - name: Cache node_modules
         uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
-             /home/runner/.cache/Cypress
+            /home/runner/.cache/Cypress
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
       - uses: cypress-io/github-action@v6
         with:
           install: false
           start: npm run dev
           browser: ${{ matrix.browser }}
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cypress-videos-${{ matrix.browser }}
           path: cypress/videos
           retention-days: 5
+
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots-${{ matrix.browser }}
           path: cypress/screenshots
           retention-days: 5
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Déployer en production via SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /next-cda241
+            pm2 pull                                    
+            pm2 restart all
