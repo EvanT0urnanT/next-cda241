@@ -57,6 +57,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: test
+    if: github.ref == 'master'
     steps:
       - name: Déployer en production via SSH
         uses: appleboy/ssh-action@v0.1.6
@@ -64,7 +65,8 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          strict: true
           script: |
             cd /next-cda241
-            pm2 pull                                    
-            pm2 restart all
+            git pull origin master        # si besoin de récupérer le dernier code
+            pm2 restart all             # relancer toutes les apps PM2
