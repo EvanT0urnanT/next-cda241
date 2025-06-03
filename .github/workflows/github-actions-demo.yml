@@ -53,7 +53,7 @@ jobs:
           name: cypress-screenshots-${{ matrix.browser }}
           path: cypress/screenshots
           retention-days: 5
-          
+
 
   deploy:
     runs-on: ubuntu-latest
@@ -61,12 +61,12 @@ jobs:
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Déployer en production via SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          port: ${{ 22 }}
+          port: 22 
           script: |
             cd /next-cda241
             git pull origin master        # si besoin de récupérer le dernier code
