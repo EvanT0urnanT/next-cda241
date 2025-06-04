@@ -1,5 +1,5 @@
 FROM debian:12 AS nodejs-my-website
-
+LABEL org.opencontainers.image.source https://github.com/evant0urnant/next-cda241
 RUN apt-get update -yq \
 && apt-get install curl gnupg -yq \
 && curl -sL https://deb.nodesource.com/setup_18.x | bash \
