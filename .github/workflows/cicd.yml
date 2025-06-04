@@ -1,19 +1,17 @@
-on: [push]
+on: [workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Cache node_modules
         uses: actions/cache@v4
         with:
           path: |
             node_modules
-            /home/runner/.cache/Cypress
+             /home/runner/.cache/Cypress
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-
       - run: npm install
       - run: npm run build
 
@@ -25,28 +23,24 @@ jobs:
         browser: ['chrome', 'edge']
     steps:
       - uses: actions/checkout@v4
-
       - name: Cache node_modules
         uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
-            /home/runner/.cache/Cypress
+             /home/runner/.cache/Cypress
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-
       - uses: cypress-io/github-action@v6
         with:
           install: false
           start: npm run dev
           browser: ${{ matrix.browser }}
-
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cypress-videos-${{ matrix.browser }}
           path: cypress/videos
           retention-days: 5
-
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -54,22 +48,20 @@ jobs:
           path: cypress/screenshots
           retention-days: 5
 
-
   deploy:
+    needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    if: github.ref_name == 'main'
     steps:
-      - name: Déployer en production via SSH
+      - name: Deploy
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          port: 22 
-          debug: true
           script: |
-            cd next-cda241/
-            git pull origin master
-            npm install
-            npm run build
-            # pm2 restart all         
+            cd next-cda241
+            git pull origin main
+            /home/ubuntu/.nvm/versions/node/v24.1.0/bin/npm install
+            /home/ubuntu/.nvm/versions/node/v24.1.0/bin/npm run build
+            /home/ubuntu/.nvm/versions/node/v24.1.0/bin/pm2 restart all

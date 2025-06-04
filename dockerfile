@@ -1,12 +1,15 @@
-FROM debian:12 AS nodejs-my-website
-LABEL org.opencontainers.image.source https://github.com/evant0urnant/next-cda241
+# FROM node:20-alpine3.18
+FROM debian:12
+
+LABEL org.opencontainers.image.source=https://github.com/alexispe/next-cda241
+
 RUN apt-get update -yq \
 && apt-get install curl gnupg -yq \
-&& curl -sL https://deb.nodesource.com/setup_18.x | bash \
+&& curl -sL https://deb.nodesource.com/setup_24.x | bash \
 && apt-get install nodejs -yq \
 && apt-get clean -y
 
-ADD . /app/
+COPY . /app/
 
 WORKDIR /app
 
